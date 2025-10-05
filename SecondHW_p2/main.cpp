@@ -27,14 +27,30 @@ int main() {
     // 初始点
     Vector2d xk(student_id % 827, student_id % 1709);
 
-    // 牛顿下降法迭代
-    Matrix2d H_inv;
-    H_inv << 0.5, 0, 0, 0.5; // Hessian逆矩阵 [[2,0],[0,2]]的逆
+    // 计算 Hessian 矩阵和逆矩阵
+    Matrix2d H;
+    H << 2, 0,
+         0, 2;
+    
+    // 添加调试输出
+    logger->debug("Hessian 矩阵 H: {}", H);
+    
+    // 使用 Eigen 计算逆矩阵
+    Matrix2d H_inv = H.inverse();
+    
+    // 添加调试输出
+    logger->debug("Hessian 逆矩阵 H_inv (通过 H.inverse() 计算): {}", H_inv);
+    
+    // 验证逆矩阵
+    Matrix2d identity_check = H * H_inv;
+    
+    // 添加调试输出
+    logger->debug("验证 H * H_inv = I (单位矩阵): {}", identity_check);
 
-    logger->debug("({}, {})", xk(0), xk(1)); // 格式化输出
+    logger->debug("初始点: ({}, {})", xk(0), xk(1));
 
     while (true) {
-        Vector2d grad(2 * xk(0), 2 * xk(1)); // 梯度?
+        Vector2d grad(2 * xk(0), 2 * xk(1)); // 梯度 ∇f = [2x, 2y]
         Vector2d xk_new = xk - lambda * H_inv * grad;
         
         if ((xk_new - xk).norm() < delta) break;
@@ -45,7 +61,7 @@ int main() {
 
     // 输出最小值 f(x,y) = x² + y²
     double min_value = xk.squaredNorm();
-    logger->info("{}", min_value);
+    logger->info("最小值: {}", min_value);
 
     return 0;
 }
